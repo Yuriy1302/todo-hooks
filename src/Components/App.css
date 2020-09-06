@@ -1,0 +1,35 @@
+/* fadeInDown */
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -50%, 0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none; } }
+@-moz-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -moz-transform: translate3d(0, -50%, 0); }
+  100% {
+    opacity: 1;
+    -moz-transform: none; } }
+@-o-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -o-transform: translate3d(0, -50%, 0); }
+  100% {
+    opacity: 1;
+    -o-transform: none; } }
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -50%, 0); }
+  100% {
+    opacity: 1;
+    transform: none; } }
+
+.u--fadeInDown {
+  -webkit-animation: fadeInDown 1s ease-in;
+  -moz-animation: fadeInDown 1s ease-in;
+  -o-animation: fadeInDown 1s ease-in;
+  animation: fadeInDown 1s ease-in; }
