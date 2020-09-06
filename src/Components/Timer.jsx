@@ -3,14 +3,20 @@ import React from 'react';
 
 const Timer = (props) => {
 
-  const transformMsToTime = (ms) => {
-    let sec = Math.floor((ms / 1000) % 60);
+  const transformMsToTime = (seconds) => {
+    /* let sec = Math.floor((ms / 1000) % 60);
     let min = Math.floor((ms / (1000 * 60)) % 60);
     let hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
     sec = sec < 10 ? `0${sec}` : sec;
+    min = min < 10 ? `0${min}` : min; */
+
+    let sec = seconds;
+    let min = Math.floor(seconds / 60);
+    let hours = Math.floor(seconds / 60 / 60);
+    sec = sec < 10 ? `0${sec}` : sec;
     min = min < 10 ? `0${min}` : min;
 
-    if (ms >= 3600000) {
+    if (seconds >= 3600) {
       hours = hours < 10 ? `0${hours}` : hours;
       return `${hours}:${min}:${sec}`;
     }
@@ -19,6 +25,8 @@ const Timer = (props) => {
 
   
   const { timeResult, onStartTimer, onStopTimer } = props;
+
+  //console.log(`timeResult ${timeResult}`);
 
   return (
     <span className="description">

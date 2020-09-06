@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import Timer from './Timer';
@@ -7,43 +7,69 @@ import { MyContext } from './App';
 
 const Task = (props) => {
 
-  let timerID = useRef();
+  //let timerID = useRef();
+  let timerID = useRef(null);
   const { task } = props;
   const { removeTask, completeTask, updateTimer } = useContext(MyContext);
   
-  const [ timeStart, setTimeStart ] = useState(0);
-  const [ timeTemp, setTimeTemp ] = useState(0);
-  const [ timeResult, setTimeResult ] = useState(0);
+  //const [ timeResult, setTimeResult ] = useState(0);
+  const [ seconds, setSeconds ] = useState(task.timer);
+  const [ isActive, setIsActive ] = useState(false);
 
-  //useEffect(() => setTimeResult(task.timer), [task.timer]);
-  //useEffect(() => () => clearTimeout(timerID), []);
+  /* const tick = () => {
+    setSeconds(sec => sec + 1);
+    updateTimer(task.id, seconds);
+  } */
 
-  const tick = () => {
-    setTimeResult(timeTemp + (Number(Date.now()) - timeStart));
-    updateTimer(task.id, timeResult);
-  }
-
-  const onStartTimer = () => {
+  const onStartTimer = (timerID) => {
     console.log('start timer');
     clearTimeout(timerID.current);
-    setTimeTemp(timeResult);
-    setTimeStart(Number(Date.now()));
-
-    const loop = () => {
-      timerID = setTimeout(() => {
-        tick();
-        loop();
-      }, 1000);
-    };
-
-    loop();
+    setIsActive(true);
   };
 
   const onStopTimer = () => {
     console.log('stop timer');
     clearTimeout(timerID.current);
-    setTimeTemp(timeResult);
+    setIsActive(false);
   }
+
+  //const start = useCallback(() => onStartTimer(), [onStartTimer]);
+  //const stop = useCallback(() => onStopTimer(), [onStopTimer]);
+  //const updateTick = useCallback(() => tick());
+  //const update = useCallback(() => updateTimer(task.id, seconds), [task.id, seconds, updateTimer]);
+
+  
+
+  useEffect(() => {
+    //let timerID = null;
+    
+    if (isActive) {
+      clearTimeout(timerID.current);
+      timerID.current = setTimeout(() => {
+        setSeconds(sec => sec + 1);
+        //update(task.id, seconds);
+      }, 1000);
+    } else if (!isActive) {
+      clearTimeout(timerID.current);
+      //update(task.id, seconds);
+    }
+
+    if (task.isCompleted) {
+      clearTimeout(timerID.current);
+      setIsActive(false);
+      //update(task.id, seconds);
+    }
+
+    //update();
+    //update(task.id, seconds);
+
+    updateTimer(task.id, seconds);
+
+    return () => clearTimeout(timerID.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, seconds, task.isCompleted, task.id]);
+
+  
 
   let classNames = 'completed';
 
@@ -59,7 +85,7 @@ const Task = (props) => {
         <input className="toggle" type="checkbox" name={task.id} checked={task.isCompleted} onChange={completeTask} />
         <label>
           <span className="title">{task.message}</span>
-          <Timer timeResult={timeResult} onStartTimer={onStartTimer} onStopTimer={onStopTimer} />
+          <Timer timeResult={seconds} onStartTimer={onStartTimer} onStopTimer={onStopTimer} />
           <span className="description">
             created&nbsp;
               {formatDistanceToNow(task.created, { includeSeconds: true })}
