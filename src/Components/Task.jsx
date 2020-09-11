@@ -1,67 +1,47 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import PropTypes from 'prop-types';
 
 import Timer from './Timer';
 
-import { MyContext } from './App';
+import { TaskContext } from './service-context';
 
 const Task = (props) => {
-
-  //let timerID = useRef();
-  let timerID = useRef(null);
   const { task } = props;
-  const { removeTask, completeTask, updateTimer } = useContext(MyContext);
-  
-  //const [ timeResult, setTimeResult ] = useState(0);
-  const [ seconds, setSeconds ] = useState(task.timer);
-  const [ isActive, setIsActive ] = useState(false);
+  const { removeTask, completeTask, updateTimer, onSaveEditing } = useContext(TaskContext);
 
-  /* const tick = () => {
-    setSeconds(sec => sec + 1);
-    updateTimer(task.id, seconds);
-  } */
+  const [seconds, setSeconds] = useState(task.timer);
+  const [isActive, setIsActive] = useState(false);
 
-  const onStartTimer = (timerID) => {
-    console.log('start timer');
+  const [editMode, setEditMode] = useState(false);
+  const [editValue, setEditValue] = useState(task.message);
+
+  const timerID = useRef(null);
+
+  const onStartTimer = () => {
     clearTimeout(timerID.current);
     setIsActive(true);
   };
 
   const onStopTimer = () => {
-    console.log('stop timer');
     clearTimeout(timerID.current);
     setIsActive(false);
-  }
-
-  //const start = useCallback(() => onStartTimer(), [onStartTimer]);
-  //const stop = useCallback(() => onStopTimer(), [onStopTimer]);
-  //const updateTick = useCallback(() => tick());
-  //const update = useCallback(() => updateTimer(task.id, seconds), [task.id, seconds, updateTimer]);
-
-  
+  };
 
   useEffect(() => {
-    //let timerID = null;
-    
     if (isActive) {
       clearTimeout(timerID.current);
       timerID.current = setTimeout(() => {
-        setSeconds(sec => sec + 1);
-        //update(task.id, seconds);
+        setSeconds((sec) => sec + 1);
       }, 1000);
     } else if (!isActive) {
       clearTimeout(timerID.current);
-      //update(task.id, seconds);
     }
 
     if (task.isCompleted) {
       clearTimeout(timerID.current);
       setIsActive(false);
-      //update(task.id, seconds);
     }
-
-    //update();
-    //update(task.id, seconds);
 
     updateTimer(task.id, seconds);
 
@@ -69,15 +49,15 @@ const Task = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, seconds, task.isCompleted, task.id]);
 
-  
-
   let classNames = 'completed';
 
   if (task.state === 'active') {
     classNames = '';
   }
 
-
+  if (editMode) {
+    classNames = 'editing';
+  }
 
   return (
     <li className={classNames}>
@@ -88,16 +68,16 @@ const Task = (props) => {
           <Timer timeResult={seconds} onStartTimer={onStartTimer} onStopTimer={onStopTimer} />
           <span className="description">
             created&nbsp;
-              {formatDistanceToNow(task.created, { includeSeconds: true })}
+            {formatDistanceToNow(task.created, { includeSeconds: true })}
             &nbsp;ago
           </span>
         </label>
         <button
-            type="button"
-            className="icon icon-edit"
-            name={task.id}
-            onClick={completeTask}
-            aria-label="Edite task"
+          type="button"
+          className="icon icon-edit"
+          name={task.id}
+          onClick={() => setEditMode(!editMode)}
+          aria-label="Edite task"
         />
         <button
           type="button"
@@ -106,11 +86,66 @@ const Task = (props) => {
           aria-label="Delete task"
         />
       </div>
+      {editMode && (
+        <EditInput
+          task={task}
+          editValue={editValue}
+          editMode={editMode}
+          setEditValue={setEditValue}
+          setEditMode={setEditMode}
+          onSaveEditing={onSaveEditing}
+        />
+      )}
     </li>
   );
 };
 
+const EditInput = (props) => {
+  const { task, editValue, editMode, setEditValue, onSaveEditing, setEditMode } = props;
 
+  const onChangeEditValue = (event) => {
+    event.preventDefault();
+    setEditValue(event.target.value);
+  };
+
+  const onSaveEditTaskInBlur = (event) => {
+    event.preventDefault();
+    const title = event.currentTarget.value;
+    const id = event.currentTarget.name;
+    onSaveEditing(id, title);
+    setEditMode(!editMode);
+  };
+
+  const onSubmitEditTask = (id, title) => (event) => {
+    event.preventDefault();
+    onSaveEditing(id, title);
+    setEditMode(!editMode);
+  };
+
+  return (
+    <form onSubmit={onSubmitEditTask(task.id, editValue)}>
+      <input
+        type="text"
+        className="edit"
+        name={task.id}
+        value={editValue}
+        onChange={onChangeEditValue}
+        onBlur={onSaveEditTaskInBlur}
+      />
+    </form>
+  );
+};
+
+Task.propTypes = {
+  task: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
+};
+EditInput.propTypes = {
+  task: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
+  editValue: PropTypes.string.isRequired,
+  editMode: PropTypes.bool.isRequired,
+  setEditValue: PropTypes.func.isRequired,
+  onSaveEditing: PropTypes.func.isRequired,
+  setEditMode: PropTypes.func.isRequired,
+};
 
 export default Task;
-

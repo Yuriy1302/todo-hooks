@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
-import { FooterContex } from './App';
 
-/* import PropTypes from 'prop-types'; */
+import { FooterContex } from './service-context';
 
 const filters = [
   ['all', 'All'],
@@ -9,18 +8,17 @@ const filters = [
   ['finished', 'Completed'],
 ];
 
-const TaskFilter = (props) => {
-
+const TaskFilter = () => {
   const { filterState, onFilterStateRename } = useContext(FooterContex);
-  
+
   const onFilterSelection = (event) => {
     event.preventDefault();
     onFilterStateRename(event.target.name);
   };
 
-  const renderFilterButtons = ([filterName, name], filterState) => {
-    const classNames = filterName === filterState ? 'selected' : '';
-    
+  const renderFilterButtons = ([filterName, name], filter) => {
+    const classNames = filterName === filter ? 'selected' : '';
+
     return (
       <li key={filterName}>
         <button
@@ -36,17 +34,7 @@ const TaskFilter = (props) => {
     );
   };
 
-  return (
-    <ul className="filters">
-      {filters.map((el) => renderFilterButtons(el, filterState))}
-    </ul>
-  );
-  
-}
-
-/* Filter.propTypes = {
-  filterState: PropTypes.string.isRequired,
-  onFilterNameChange: PropTypes.func.isRequired,
-}; */
+  return <ul className="filters">{filters.map((el) => renderFilterButtons(el, filterState))}</ul>;
+};
 
 export default TaskFilter;

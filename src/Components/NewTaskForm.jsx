@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const newTaskForm = (props) => {
-
+const NewTaskForm = (props) => {
   const { newTask, handleNewTaskChang, handleNewTask } = props;
 
   return (
@@ -15,6 +15,12 @@ const newTaskForm = (props) => {
       />
     </form>
   );
-}
+};
 
-export default newTaskForm;
+NewTaskForm.propTypes = {
+  newTask: PropTypes.string.isRequired,
+  handleNewTask: PropTypes.func.isRequired,
+  handleNewTaskChang: PropTypes.func.isRequired,
+};
+
+export default NewTaskForm;
